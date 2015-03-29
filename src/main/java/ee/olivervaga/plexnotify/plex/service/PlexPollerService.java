@@ -9,16 +9,17 @@ import ee.olivervaga.plexnotify.settings.service.SettingsService;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Service
 public class PlexPollerService {
@@ -27,7 +28,7 @@ public class PlexPollerService {
 
     private static final String SESSION_PATH = "/status/sessions";
 
-    private Set<Video> currentSessions = new HashSet<>();
+    private Set<Video> currentSessions = new LinkedHashSet<>();
 
     private boolean plexUp;
 
@@ -37,6 +38,8 @@ public class PlexPollerService {
     private XMLObjectifier objectifier;
     @Autowired
     private SettingsService settingsService;
+    @Autowired
+    private SimpMessagingTemplate brokerMessagingTemplate;
 
     public PlexStatusResponse pingServer() {
         Settings settings = settingsService.getSettings();
@@ -79,10 +82,9 @@ public class PlexPollerService {
             if (code == HttpStatus.SC_OK) {
                 if (!plexUp) plexUp = true;
                 PlexSessionResponse response = (PlexSessionResponse) objectifier.toObject(method.getResponseBodyAsString(), XMLObjectifier.ModelType.SESSION);
-                logger.info(ReflectionToStringBuilder.toString(response, ToStringStyle.MULTI_LINE_STYLE));
+//                logger.info(ReflectionToStringBuilder.toString(response, ToStringStyle.MULTI_LINE_STYLE));
                 updateSessionsList(response);
                 return response;
-//                return (PlexSessionResponse) objectifier.toObject(method.getResponseBodyAsString(), XMLObjectifier.ModelType.SESSION);
             } else {
                 return null;
             }
@@ -98,6 +100,7 @@ public class PlexPollerService {
             return;
         logger.info("Pinging plex");
         updateSessionsList(getPlexSession());
+        brokerMessagingTemplate.convertAndSend("/sessions", currentSessions);
         logger.info("Plex pinged");
     }
 
