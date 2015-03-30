@@ -4,7 +4,7 @@ import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamAsAttribute;
 
 @XStreamAlias("Video")
-public class Video {
+public class Video implements Comparable<Video> {
 
     @XStreamAlias("thumb")
     @XStreamAsAttribute
@@ -103,5 +103,10 @@ public class Video {
 
     public void setPlayer(Player player) {
         this.player = player;
+    }
+
+    @Override
+    public int compareTo(Video v) {
+        return this.sessionKey.compareTo(v.getSessionKey());
     }
 }

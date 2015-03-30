@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.TreeSet;
 
 @Service
 public class PlexPollerService {
@@ -28,7 +28,7 @@ public class PlexPollerService {
 
     private static final String SESSION_PATH = "/status/sessions";
 
-    private Set<Video> currentSessions = new LinkedHashSet<>();
+    private Set<Video> currentSessions = new TreeSet<>();
 
     private boolean plexUp;
 
@@ -98,10 +98,8 @@ public class PlexPollerService {
     private void updatePlexSessions() {
         if (!plexUp)
             return;
-        logger.info("Pinging plex");
         updateSessionsList(getPlexSession());
         brokerMessagingTemplate.convertAndSend("/sessions", currentSessions);
-        logger.info("Plex pinged");
     }
 
     private void updateSessionsList(PlexSessionResponse sessions) {
