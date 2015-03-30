@@ -3,6 +3,7 @@
 <head lang="en">
     <meta charset="UTF-8"/>
     <link rel="stylesheet" th:href="@{/static/materialize/css/materialize.min.css}"/>
+    <link rel="stylesheet" th:href="@{/static/css/screen.css}"/>
     <title>Plex Notifier</title>
 </head>
 <body>
@@ -23,8 +24,15 @@
                             <img data-bind="attr:{src: thumbnailSrc}"/>
                         </div>
                         <div class="card-content white-text">
-                            <span class="card-title" data-bind="text: actualTitle"></span>
-                            <!--<p><span th:text="${user.name}"></span> is watching on <span th:text="*{player.name}"></span></p>-->
+                            <span class="card-title" data-bind="text: actualTitle"></span><br/>
+                            Playing on <span data-bind="text: player.name"></span> using "<span
+                                data-bind="text: player.product"></span>".
+                        </div>
+                        <div class="card-action">
+                            <div class="valign-wrapper">
+                                <span data-bind="html: userImg"></span><span class="valign left-10"
+                                                                             data-bind="text: username"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -75,6 +83,22 @@
 
         self.thumbnailSrc = ko.computed(function () {
             return 'http://' + [[${serverAddress}]] + self.actualThumbnail;
+        });
+
+        self.username = ko.computed(function () {
+            if (self.user.name) {
+                return self.user.name;
+            } else {
+                return "No user";
+            }
+        });
+
+        self.userImg = ko.computed(function () {
+            if (self.user.thumbnail) {
+                return '<img class="user-img" src="http://' + [[${serverAddress}]] + self.user.thumbnail + '"/>'
+            } else {
+                return '<i class="small mdi-action-account-circle">';
+            }
         });
     }
 
