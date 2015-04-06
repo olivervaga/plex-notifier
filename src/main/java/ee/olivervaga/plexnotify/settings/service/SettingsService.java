@@ -2,6 +2,7 @@ package ee.olivervaga.plexnotify.settings.service;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import ee.olivervaga.plexnotify.plex.service.PlexPollerService;
 import ee.olivervaga.plexnotify.settings.model.Settings;
 import org.apache.commons.io.FileUtils;
@@ -65,7 +66,7 @@ public class SettingsService {
         if (!settingsDirectory.exists()) {
             settingsDirectory.mkdirs();
         }
-        Gson gson = new Gson();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String settingsToFile = gson.toJson(settings);
         try {
             FileUtils.write(settingsFile, settingsToFile, Charset.forName("UTF-8"));

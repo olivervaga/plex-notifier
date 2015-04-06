@@ -49,7 +49,7 @@
 <script type="text/javascript" th:inline="javascript">
     /*<![CDATA[*/
     var stompClient = null;
-    var sessionsViewModel = new SessionsViewModel();
+    var sessionsViewModel;
 
     function subscribeToSessions() {
         var socket = new SockJS('/subscribe');
@@ -108,6 +108,7 @@
         self.sessions = ko.observableArray();
     }
     $(function () {
+        sessionsViewModel = new SessionsViewModel();
         subscribeToSessions();
         ko.applyBindings(sessionsViewModel);
     });

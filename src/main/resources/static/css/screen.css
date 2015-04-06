@@ -2,6 +2,10 @@
     margin-left: 10px;
 }
 
+.switch-label {
+    margin-top: -10px;
+}
+
 .user-img {
     width: 30px;
     height: 30px;

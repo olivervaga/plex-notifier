@@ -3,6 +3,7 @@
 <head lang="en">
     <meta charset="UTF-8"/>
     <link rel="stylesheet" th:href="@{/static/materialize/css/materialize.min.css}"/>
+    <link rel="stylesheet" th:href="@{/static/css/screen.css}"/>
     <title>Plex Notifier Settings</title>
 </head>
 <body>
@@ -12,22 +13,116 @@
     <div class="row">
         <form class="col s10 offset-s1" action="#" th:action="@{/settings}" th:object="${settings}" method="post">
             <div class="row">
+                <h4>General</h4>
+
                 <div class="input-field col s6">
                     <input type="text" th:field="*{serverAddress}" class="validate"/>
-                    <label th:for="*{serverAddress}">Server Address</label>
+                    <label>Server Address</label>
                 </div>
                 <div class="input-field col s6">
                     <input type="text" th:field="*{serverPort}" class="validate"/>
-                    <label th:for="*{serverPort}">Server port</label>
+                    <label>Server port</label>
                 </div>
             </div>
+            <div class="row">
+                <h4>Pushbullet</h4>
+
+                <div class="input-field col s6">
+                    <input type="text" th:field="*{pushbullet.accessToken}" class="validate"/>
+                    <label>Access token</label>
+                </div>
+            </div>
+            <button class="btn waves-effect waves-light" type="button" id="get-devices">Refresh devices
+                <i class="mdi-action-autorenew right"></i>
+            </button>
+
+            <div data-bind="foreach: devices">
+                <div class="row">
+                    <div class="input-field col s3">
+                        <span data-bind="text: nickname"></span>
+                    </div>
+                    <div class="input-field col s2">
+                        <div class="switch">
+                            <label class="switch-label"
+                                   data-bind="attr:{'for': 'pushbullet.devices' + $index() + '.active'}">
+                                Off
+                                <input type="checkbox"
+                                       data-bind="checked: active, attr:{id: 'pushbullet.devices' + $index() + '.active', name: 'pushbullet.devices[' + $index() + '].active'}"/>
+                                <input type="hidden"
+                                       data-bind="attr:{name: '_pushbullet.devices[' + $index() + '].active'}"/>
+                                <span class="lever"></span>
+                                On
+                            </label>
+                        </div>
+                        <input type="hidden"
+                               data-bind="value: nickname, attr:{id: 'pushbullet.devices' + $index() + '.nickname', name: 'pushbullet.devices[' + $index() + '].nickname'}"/>
+                        <input type="hidden"
+                               data-bind="value: iden, attr:{id: 'pushbullet.devices' + $index() + '.iden', name: 'pushbullet.devices[' + $index() + '].iden'}"/>
+                    </div>
+                </div>
+            </div>
+            <hr/>
             <button class="btn waves-effect waves-light" type="submit" name="action">Submit
-                <i class="mdi-content-send right"></i>
+                <i class="mdi-action-done right"></i>
             </button>
         </form>
     </div>
 </div>
 <script th:src="@{/static/js/jquery-2.1.3.min.js}"></script>
 <script th:src="@{/static/materialize/js/materialize.min.js}"></script>
+<script th:src="@{/static/js/knockout-3.3.0.min.js}"></script>
+<script type="text/javascript" th:inline="javascript">
+    /*<![CDATA[*/
+
+    var settingsViewModel;
+
+    var getDevices = function (accessToken) {
+        $.ajax({
+            url: "https://api.pushbullet.com/v2/devices",
+            headers: {
+                Authorization: "Bearer " + accessToken
+            }
+        }).done(function (data) {
+            settingsViewModel.devices([]);
+            $.each(data.devices, function (index, device) {
+                if (device.active && device.pushable) {
+                    settingsViewModel.devices.push(new PushbulletDevice(device));
+                }
+            });
+        });
+    };
+
+    function PushbulletDevice(device) {
+        var self = this;
+        self.iden = device.iden;
+        self.nickname = device.nickname;
+        self.active = false;
+    }
+
+    function SettingsViewModel() {
+        var self = this;
+
+        self.devices = ko.observableArray();
+    }
+
+    $(function () {
+        settingsViewModel = new SettingsViewModel();
+        ko.applyBindings(settingsViewModel);
+
+        $("#get-devices").click(function (event) {
+            event.preventDefault();
+            getDevices($("#pushbullet\\.accessToken").val());
+        });
+
+        var devices = JSON.parse([[${devices}]]);
+
+        if (devices) {
+            $.each(devices, function (index, device) {
+                settingsViewModel.devices.push(new PushbulletDevice(device));
+            });
+        }
+    });
+    /*]]>*/
+</script>
 </body>
 </html>

@@ -6,9 +6,7 @@ public class Settings {
 
     private String serverPort;
 
-    private String plexUser;
-
-    private String plexPassword;
+    private Pushbullet pushbullet;
 
     public String getServerAddress() {
         return serverAddress;
@@ -26,19 +24,11 @@ public class Settings {
         this.serverPort = serverPort;
     }
 
-    public String getPlexUser() {
-        return plexUser;
+    public Pushbullet getPushbullet() {
+        return pushbullet;
     }
 
-    public void setPlexUser(String plexUser) {
-        this.plexUser = plexUser;
-    }
-
-    public String getPlexPassword() {
-        return plexPassword;
-    }
-
-    public void setPlexPassword(String plexPassword) {
-        this.plexPassword = plexPassword;
+    public void setPushbullet(Pushbullet pushbullet) {
+        this.pushbullet = pushbullet;
     }
 }
